@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OMD Budget Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0A0F2E;--red:#E8192C;--red-dk:#C01020;--blue:#2B4AE0;--yellow:#F5A800;--bg:#F5F6FA;--white:#fff;--border:#E0E3EE;--muted:#7A7F9C;--text:#0A0F2E;--green:#0FAA58;--font:'Barlow',sans-serif;--fontC:'Barlow Condensed',sans-serif;--r:10px;--r2:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.nav{background:var(--navy);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-left{display:flex;align-items:center;gap:14px}
+.nav-brand{font-weight:900;font-size:22px;color:#fff;letter-spacing:-.02em}
+.nav-brand span{color:var(--red)}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,.15)}
+.nav-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase}
+.nav-ver{font-size:10px;font-weight:700;color:var(--red);border:1px solid rgba(232,25,44,.35);padding:2px 8px;border-radius:20px}
+
+/* LAYOUT */
+.main{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.sec-num{width:40px;height:40px;border-radius:50%;background:var(--red);color:#fff;font-family:var(--fontC);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-t{font-size:22px;font-weight:800;color:var(--navy)}
+.sec-s{font-size:13px;color:var(--muted);margin-top:2px}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px;box-shadow:0 4px 24px rgba(10,15,46,.06)}
+.card-t{font-size:12px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;padding-left:12px;border-left:3px solid var(--red)}
+
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg.t4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.05em}
+input,select{font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);padding:10px 12px;outline:none;transition:.2s;width:100%}
+input:focus,select:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(10,15,46,.06)}
+
+/* PLATFORM ROWS */
+.plat-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.plat-row{display:grid;grid-template-columns:1.5fr 1.5fr 1fr .5fr 36px;gap:10px;align-items:center;padding:12px 14px;background:var(--bg);border-radius:var(--r2);border:1px solid var(--border)}
+.plat-row.header{background:var(--navy);border-color:var(--navy)}
+.plat-row.header span{font-size:10px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em}
+.plat-row input,.plat-row select{background:#fff;font-size:13px;padding:8px 10px}
+.plat-share{font-family:var(--fontC);font-size:14px;font-weight:700;color:var(--blue);text-align:center}
+.plat-del{width:32px;height:32px;border:none;background:#FEE2E5;color:var(--red);border-radius:var(--r2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+.plat-del:hover{background:#FECDD2}
+.add-plat{width:100%;padding:10px;background:none;border:1.5px dashed var(--border);border-radius:var(--r2);color:var(--muted);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer}
+.add-plat:hover{border-color:var(--navy);color:var(--navy)}
+
+/* LIVE TOTALS */
+.totals-card{background:var(--navy);border-radius:var(--r);padding:28px;margin-top:20px;color:#fff}
+.totals-title{font-size:12px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px}
+.totals-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08);align-items:center}
+.totals-row:last-child{border-bottom:none}
+.totals-row.grand{border-top:2px solid var(--red);margin-top:4px;padding-top:16px}
+.tr-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.6)}
+.tr-label.bold{color:#fff;font-weight:800;font-size:14px}
+.tr-label.red{color:var(--red);font-weight:800}
+.tr-val{font-family:var(--fontC);font-size:18px;font-weight:700;color:#fff;text-align:right}
+.tr-val.muted{color:rgba(255,255,255,.45);font-size:16px}
+.tr-val.big{font-size:24px;font-weight:800;color:#2EE07A}
+.tr-header{font-size:10px;font-weight:800;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;text-align:right}
+
+.rate-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600;color:var(--navy);margin-left:auto}
+.rate-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:20px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:var(--r2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.2s}
+.btn-nvy{background:var(--navy);color:#fff}.btn-nvy:hover{background:#141B3D}
+.btn-out{background:#fff;color:var(--navy);border:1.5px solid var(--border)}.btn-out:hover{border-color:var(--navy)}
+
+/* ═══════════════════════════════════════════════ */
+/* ═══ FORMATTED SHEET — THE PRINTABLE OUTPUT ═══ */
+/* ═══════════════════════════════════════════════ */
+.preview-section{margin-top:28px}
+.preview-title{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.preview-title::before{content:'';width:4px;height:16px;background:var(--red);border-radius:2px}
+
+.sheet{background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:0 12px 48px rgba(10,15,46,.12);border:1px solid var(--border)}
+
+/* Sheet top bar */
+.sh-topbar{background:var(--red);height:6px}
+
+/* Sheet header */
+.sh-header{padding:28px 36px 24px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)}
+.sh-header-left{}
+.sh-header-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.sh-header-campaign{font-size:24px;font-weight:900;color:var(--navy);letter-spacing:-.02em;line-height:1.2}
+.sh-header-client{font-size:16px;font-weight:500;color:var(--muted);margin-top:2px}
+.sh-header-right{text-align:right}
+.sh-logo{font-weight:900;font-size:36px;color:var(--red);letter-spacing:-.03em;line-height:1}
+
+/* Sheet meta strip */
+.sh-meta{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:2px solid var(--red)}
+.sh-meta-item{padding:14px 20px;border-right:1px solid var(--border)}
+.sh-meta-item:last-child{border-right:none}
+.shm-l{font-size:9px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.shm-v{font-size:13px;font-weight:700;color:var(--navy)}
+
+/* Sheet table */
+.sh-table{width:100%;border-collapse:collapse}
+.sh-table thead th{background:var(--navy);color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:12px 20px;text-align:left}
+.sh-table thead th.r{text-align:right}
+.sh-table tbody td{padding:12px 20px;border-bottom:1px solid #ECEEF4;font-size:13px;font-weight:500;color:var(--text);vertical-align:middle}
+.sh-table tbody td.r{text-align:right;font-family:var(--fontC);font-weight:600;font-size:14px;letter-spacing:.01em;white-space:nowrap}
+.sh-table tbody td.platform{font-weight:700}
+
+/* Row types */
+.sh-table tr.media-group td{background:#F0F1F6;font-weight:800;font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;padding:8px 20px;border-bottom:1px solid var(--border)}
+.sh-table tr.data-row td{background:#fff}
+.sh-table tr.data-row:hover td{background:#FAFBFD}
+.sh-table tr.subtotal-row td{background:#fff;font-weight:800;color:var(--navy);border-top:2px solid var(--navy);border-bottom:2px solid var(--navy);font-size:14px;padding:14px 20px;white-space:nowrap}
+.sh-table tr.subtotal-row td.r{font-size:16px;font-weight:800;white-space:nowrap}
+.sh-table tr.fee-row td{background:#FAFBFD;color:var(--muted);font-weight:500;padding:10px 20px}
+.sh-table tr.fee-row td.r{font-size:13px;color:var(--muted)}
+.sh-table tr.grand-row td{background:var(--navy);color:#fff;font-weight:800;font-size:14px;padding:16px 20px;border:none;white-space:nowrap}
+.sh-table tr.grand-row td.r{font-family:var(--fontC);font-size:22px;font-weight:800;color:#2EE07A;white-space:nowrap}
+
+/* Share bar */
+.share-wrap{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.share-bar-bg{width:60px;height:6px;background:#ECEEF4;border-radius:3px;overflow:hidden;flex-shrink:0}
+.share-bar-fill{height:100%;background:var(--red);border-radius:3px;transition:width .3s}
+.share-pct{font-family:var(--fontC);font-size:14px;font-weight:700;color:var(--navy);min-width:32px;text-align:right}
+
+/* Sheet footer */
+.sh-footer{padding:16px 36px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sh-footer-note{font-size:11px;color:var(--red);font-weight:600}
+.sh-footer-brand{font-size:11px;color:var(--muted);font-weight:500}
+
+/* ═══ PRINT ═══ */
+@page{margin:0.4in;margin-top:0.2in;margin-bottom:0.2in}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  body{background:#fff!important}
+  .nav,.no-print,.sec-head,.btn-row,.preview-title{display:none!important}
+  .card.input-card{display:none!important}
+  .totals-card{display:none!important}
+  .main{padding:0;max-width:100%}
+  .sheet{box-shadow:none!important;border:none!important;border-radius:0!important}
+  .preview-section{margin-top:0}
+  .sh-table tr.grand-row td{background:#0A0F2E!important;color:#fff!important}
+  .sh-table tr.grand-row td.r{color:#2EE07A!important;font-family:'Barlow Condensed',sans-serif!important;font-size:22px!important;font-weight:800!important}
+  .sh-topbar{background:#E8192C!important}
+  .sh-meta{border-bottom:2px solid #E8192C!important}
+  .sh-table thead th{background:#0A0F2E!important;color:#fff!important}
+  .sh-table tr.media-group td{background:#F0F1F6!important}
+  .sh-table tr.subtotal-row td{border-top:2px solid #0A0F2E!important;border-bottom:2px solid #0A0F2E!important}
+  .share-bar-bg{background:#ECEEF4!important}
+  .share-bar-fill{background:#E8192C!important}
+}
+
+@media(max-width:700px){
+  .fg,.fg.t4{grid-template-columns:1fr}
+  .plat-row{grid-template-columns:1fr 1fr;gap:8px}
+  .plat-row.header{display:none}
+  .sh-meta{grid-template-columns:1fr 1fr}
+  .nav{padding:0 14px}
+  .main{padding:16px 12px 60px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-brand"><span>omd</span></div>
+    <div class="nav-sep"></div>
+    <div class="nav-label">Budget Calculator</div>
+  </div>
+  <div class="nav-ver">v2.0</div>
+</nav>
+
+<div class="main">
+  <div class="sec-head no-print">
+    <div class="sec-num">$</div>
+    <div><div class="sec-t">Budget Summary Sheet</div><div class="sec-s">Enter platform budgets in USD. All taxes and JOD conversion calculated automatically.</div></div>
+  </div>
+
+  <!-- Campaign Info -->
+  <div class="card input-card">
+    <div class="card-t">Campaign Details</div>
+    <div class="fg t4">
+      <div class="field"><label>Client</label><input id="b-client" placeholder="e.g. Capital Bank" oninput="calc()"/></div>
+      <div class="field"><label>Campaign</label><input id="b-campaign" placeholder="e.g. Kids Account Campaign" oninput="calc()"/></div>
+      <div class="field"><label>Duration</label><input id="b-duration" placeholder="e.g. 2 months" oninput="calc()"/></div>
+      <div class="field"><label>Start Date</label><input id="b-start" placeholder="e.g. Feb 7th" oninput="calc()"/></div>
+    </div>
+    <div class="fg" style="margin-top:14px">
+      <div class="field"><label>Market</label><input id="b-market" placeholder="e.g. Jordan" oninput="calc()"/></div>
+      <div class="field" style="display:flex;flex-direction:row;align-items:center;gap:12px">
+        <div style="flex:1"><label>Exchange Rate</label><input id="b-rate" value="0.71" oninput="calc()" style="text-align:center"/></div>
+        <div class="rate-badge" style="margin-top:18px"><div class="rate-dot"></div>1 USD = <span id="rate-display">0.71</span> JOD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Budgets -->
+  <div class="card input-card">
+    <div class="card-t">Media Budget by Platform</div>
+    <div class="plat-row header no-print">
+      <span>Media Type</span>
+      <span>Platform</span>
+      <span>Budget (USD)</span>
+      <span>Share</span>
+      <span></span>
+    </div>
+    <div class="plat-rows" id="plat-rows">
+      <div class="plat-row" data-row>
+        <select class="p-media" onchange="calc()"><option>Digital plan</option><option>Social media</option><option>Search</option><option>Programmatic</option><option>Video</option><option>Display</option><option>Local publishers</option><option>Traditional</option><option>Other</option></select>
+        <select class="p-platform" onchange="calc()"><option>Meta (FB & IG)</option><option>Google Ads</option><option>YouTube</option><option>DV360</option><option>LinkedIn</option><option>Arab Trade Desk</option><option>Roya News</option><option>Adform</option><option>GDNs</option><option>SEM</option><option>CTV & OTT</option><option>Adara</option><option>TikTok</option><option>Snapchat</option><option>X (Twitter)</option><option>Other</option></select>
+        <input class="p-usd" type="number" placeholder="0" oninput="calc()" step="any"/>
+        <div class="plat-share" data-share>0%</div>
+        <button class="plat-del" onclick="delRow(this)">×</button>
+      </div>
+    </div>
+    <button class="add-plat" onclick="addRow()">+ Add Platform</button>
+  </div>
+
+  <!-- Live Totals -->
+  <div class="totals-card no-print">
+    <div class="totals-title">Budget Summary — Live</div>
+    <div class="totals-row"><div class="tr-label"></div><div class="tr-header">JOD</div><div class="tr-header">USD</div></div>
+    <div class="totals-row"><div class="tr-label bold">Media Spend (Net)</div><div class="tr-val" id="t-mj">JOD 0.00</div><div class="tr-val" id="t-mu">$ 0.00</div></div>
+    <div class="totals-row"><div class="tr-label">Agency Fees (2%)</div><div class="tr-val muted" id="t-fj">JOD 0.00</div><div class="tr-val muted" id="t-fu">$ 0.00</div></div>
+    <div class="totals-row"><div class="tr-label">Withholding Tax (10%)</div><div class="tr-val muted" id="t-wj">JOD 0.00</div><div class="tr-val muted" id="t-wu">$ 0.00</div></div>
+    <div class="totals-row"><div class="tr-label">Sales Tax (16%)</div><div class="tr-val muted" id="t-sj">JOD 0.00</div><div class="tr-val muted" id="t-su">$ 0.00</div></div>
+    <div class="totals-row grand"><div class="tr-label red">Total Net</div><div class="tr-val big" id="t-nj">JOD 0.00</div><div class="tr-val big" id="t-nu">$ 0.00</div></div>
+  </div>
+
+  <!-- ═══ FORMATTED SHEET ═══ -->
+  <div class="preview-section">
+    <div class="preview-title no-print">Formatted Budget Sheet — Print / PDF Ready</div>
+    <div class="sheet">
+      <div class="sh-topbar"></div>
+      <div class="sh-header">
+        <div class="sh-header-left">
+          <div class="sh-header-title">Budget Summary Sheet</div>
+          <div class="sh-header-campaign" id="sh-campaign">—</div>
+          <div class="sh-header-client" id="sh-client">—</div>
+        </div>
+        <div class="sh-header-right">
+          <div class="sh-logo">omd</div>
+        </div>
+      </div>
+      <div class="sh-meta">
+        <div class="sh-meta-item"><div class="shm-l">Client</div><div class="shm-v" id="shm-client">—</div></div>
+        <div class="sh-meta-item"><div class="shm-l">Duration</div><div class="shm-v" id="shm-dur">—</div></div>
+        <div class="sh-meta-item"><div class="shm-l">Start Date</div><div class="shm-v" id="shm-start">—</div></div>
+        <div class="sh-meta-item"><div class="shm-l">Market</div><div class="shm-v" id="shm-market">—</div></div>
+        <div class="sh-meta-item"><div class="shm-l">Rate</div><div class="shm-v" id="shm-rate">1 USD = 0.71 JOD</div></div>
+      </div>
+      <table class="sh-table">
+        <thead>
+          <tr>
+            <th style="width:18%">Media</th>
+            <th style="width:20%">Platform</th>
+            <th class="r" style="width:20%">Total JOD</th>
+            <th class="r" style="width:20%">Total USD</th>
+            <th class="r" style="width:22%">Platform Share</th>
+          </tr>
+        </thead>
+        <tbody id="sh-body"></tbody>
+      </table>
+      <div class="sh-footer">
+        <div class="sh-footer-note">* These are 2026 rates and are subject to change in 2027</div>
+        <div class="sh-footer-brand">© <span id="sh-year">2026</span> OMD Worldwide · All Rights Reserved</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn btn-nvy" onclick="window.print()">🖨 Print / Export PDF</button>
+    <button class="btn btn-out" id="copy-btn" onclick="copyTable()">📋 Copy Table</button>
+  </div>
+</div>
+
+<script>
+function getRate(){return parseFloat(document.getElementById('b-rate').value)||0.71}
+function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function E(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function addRow(){
+  const c=document.getElementById('plat-rows');
+  const r=document.createElement('div');
+  r.className='plat-row';r.setAttribute('data-row','');
+  r.innerHTML=`<select class="p-media" onchange="calc()"><option>Digital plan</option><option>Social media</option><option>Search</option><option>Programmatic</option><option>Video</option><option>Display</option><option>Local publishers</option><option>Traditional</option><option>Other</option></select>
+  <select class="p-platform" onchange="calc()"><option>Meta (FB & IG)</option><option>Google Ads</option><option>YouTube</option><option>DV360</option><option>LinkedIn</option><option>Arab Trade Desk</option><option>Roya News</option><option>Adform</option><option>GDNs</option><option>SEM</option><option>CTV & OTT</option><option>Adara</option><option>TikTok</option><option>Snapchat</option><option>X (Twitter)</option><option>Other</option></select>
+  <input class="p-usd" type="number" placeholder="0" oninput="calc()" step="any"/>
+  <div class="plat-share" data-share>0%</div>
+  <button class="plat-del" onclick="delRow(this)">×</button>`;
+  c.appendChild(r);
+}
+
+function delRow(b){if(document.querySelectorAll('[data-row]').length>1){b.closest('[data-row]').remove();calc()}}
+
+function calc(){
+  const rate=getRate();
+  document.getElementById('rate-display').textContent=rate;
+  document.getElementById('shm-rate').textContent='1 USD = '+rate+' JOD';
+
+  const rows=document.querySelectorAll('[data-row]');
+  let totalUSD=0;
+  const items=[];
+  rows.forEach(row=>{
+    const media=row.querySelector('.p-media')?.value||'';
+    const platform=row.querySelector('.p-platform')?.value||'';
+    const usd=parseFloat(row.querySelector('.p-usd')?.value)||0;
+    totalUSD+=usd;
+    items.push({media,platform,usd});
+  });
+
+  rows.forEach((row,i)=>{
+    const share=totalUSD>0?((items[i].usd/totalUSD)*100):0;
+    items[i].share=share;
+    row.querySelector('[data-share]').textContent=share.toFixed(0)+'%';
+  });
+
+  const mediaJOD=totalUSD*rate;
+  const feeUSD=totalUSD*0.02, feeJOD=feeUSD*rate;
+  const whUSD=totalUSD*0.10, whJOD=whUSD*rate;
+  const stUSD=totalUSD*0.16, stJOD=stUSD*rate;
+  const netUSD=totalUSD+feeUSD+whUSD+stUSD, netJOD=netUSD*rate;
+
+  // Live totals with currency prefixes
+  document.getElementById('t-mj').textContent='JOD '+fmt(mediaJOD);
+  document.getElementById('t-mu').textContent='$ '+fmt(totalUSD);
+  document.getElementById('t-fj').textContent='JOD '+fmt(feeJOD);
+  document.getElementById('t-fu').textContent='$ '+fmt(feeUSD);
+  document.getElementById('t-wj').textContent='JOD '+fmt(whJOD);
+  document.getElementById('t-wu').textContent='$ '+fmt(whUSD);
+  document.getElementById('t-sj').textContent='JOD '+fmt(stJOD);
+  document.getElementById('t-su').textContent='$ '+fmt(stUSD);
+  document.getElementById('t-nj').textContent='JOD '+fmt(netJOD);
+  document.getElementById('t-nu').textContent='$ '+fmt(netUSD);
+
+  // Sheet meta
+  const cl=document.getElementById('b-client').value||'—';
+  const cp=document.getElementById('b-campaign').value||'—';
+  document.getElementById('sh-campaign').textContent=cp;
+  document.getElementById('sh-client').textContent=cl;
+  document.getElementById('shm-client').textContent=cl;
+  document.getElementById('shm-dur').textContent=document.getElementById('b-duration').value||'—';
+  document.getElementById('shm-start').textContent=document.getElementById('b-start').value||'—';
+  document.getElementById('shm-market').textContent=document.getElementById('b-market').value||'—';
+  document.getElementById('sh-year').textContent=new Date().getFullYear();
+
+  // Build sheet table
+  const tbody=document.getElementById('sh-body');
+  tbody.innerHTML='';
+
+  // Group by media type
+  const groups={};
+  items.forEach(item=>{if(!groups[item.media])groups[item.media]=[];groups[item.media].push(item)});
+
+  const mediaKeys=Object.keys(groups);
+  let groupIdx=0;
+  mediaKeys.forEach(media=>{
+    const group=groups[media];
+    // Media group header
+    if(mediaKeys.length>1||items.length>1){
+      const gr=document.createElement('tr');gr.className='media-group';
+      gr.innerHTML=`<td colspan="5">${E(media)}</td>`;
+      tbody.appendChild(gr);
+    }
+    group.forEach(item=>{
+      const jod=item.usd*rate;
+      const barW=Math.min(100,Math.max(2,item.share));
+      const tr=document.createElement('tr');tr.className='data-row';
+      tr.innerHTML=`<td>${E(item.media)}</td>
+        <td class="platform">${E(item.platform)}</td>
+        <td class="r">JOD ${fmt(jod)}</td>
+        <td class="r">$ ${fmt(item.usd)}</td>
+        <td class="r"><div class="share-wrap"><div class="share-bar-bg"><div class="share-bar-fill" style="width:${barW}%"></div></div><div class="share-pct">${item.share.toFixed(0)}%</div></div></td>`;
+      tbody.appendChild(tr);
+    });
+    groupIdx++;
+  });
+
+  // Subtotal
+  const subR=document.createElement('tr');subR.className='subtotal-row';
+  subR.innerHTML=`<td colspan="2" style="font-weight:800">Media Spend Subtotal</td><td class="r">JOD ${fmt(mediaJOD)}</td><td class="r">$ ${fmt(totalUSD)}</td><td></td>`;
+  tbody.appendChild(subR);
+
+  // Fee rows
+  [{l:'Agency Fees 2%',j:feeJOD,u:feeUSD},{l:'10% Withholding Tax',j:whJOD,u:whUSD},{l:'16% Sales Tax',j:stJOD,u:stUSD}].forEach(f=>{
+    const tr=document.createElement('tr');tr.className='fee-row';
+    tr.innerHTML=`<td colspan="2">${f.l}</td><td class="r">JOD ${fmt(f.j)}</td><td class="r">$ ${fmt(f.u)}</td><td></td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Grand total
+  const gR=document.createElement('tr');gR.className='grand-row';
+  gR.innerHTML=`<td colspan="2" style="font-size:15px">Total Net</td><td class="r">JOD ${fmt(netJOD)}</td><td class="r">$ ${fmt(netUSD)}</td><td></td>`;
+  tbody.appendChild(gR);
+}
+
+function copyTable(){
+  const sheet=document.querySelector('.sheet');
+  const range=document.createRange();
+  range.selectNode(sheet);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+  document.execCommand('copy');
+  window.getSelection().removeAllRanges();
+  const btn=document.getElementById('copy-btn');
+  const orig=btn.innerHTML;
+  btn.innerHTML='✓ Copied!';
+  setTimeout(()=>btn.innerHTML=orig,2000);
+}
+
+calc();
+</script>
+</body>
+</html>
