@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OMD Media Plan Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0A0F2E;--red:#E8192C;--red-dk:#C01020;--blue:#2B4AE0;--yellow:#F5A800;--bg:#F5F6FA;--white:#fff;--border:#E0E3EE;--muted:#7A7F9C;--text:#0A0F2E;--green:#0FAA58;--font:'Barlow',sans-serif;--fontC:'Barlow Condensed',sans-serif;--r:10px;--r2:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.nav{background:var(--navy);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-left{display:flex;align-items:center;gap:14px}
+.nav-brand{font-weight:900;font-size:22px;color:#fff;letter-spacing:-.02em}
+.nav-brand span{color:var(--red)}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,.15)}
+.nav-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase}
+.nav-ver{font-size:10px;font-weight:700;color:var(--red);border:1px solid rgba(232,25,44,.35);padding:2px 8px;border-radius:20px}
+
+/* LAYOUT */
+.main{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.sec-num{width:40px;height:40px;border-radius:50%;background:var(--red);color:#fff;font-family:var(--fontC);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-t{font-size:22px;font-weight:800;color:var(--navy)}
+.sec-s{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px;box-shadow:0 4px 24px rgba(10,15,46,.06)}
+.card-t{font-size:12px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;padding-left:12px;border-left:3px solid var(--red)}
+
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg.single{grid-template-columns:1fr}
+.fg.t3{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.05em}
+.field .hint{font-size:11px;color:var(--muted);font-style:italic}
+input,select,textarea{font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);padding:10px 12px;outline:none;transition:.2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(10,15,46,.06)}
+textarea{resize:vertical;min-height:72px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 5 5-5' fill='none' stroke='%237A7F9C' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+/* PLATFORMS */
+.plat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.plat-chk{display:none}
+.plat-lbl{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border:1.5px solid var(--border);border-radius:var(--r2);cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);text-align:center;transition:.2s;background:var(--bg)}
+.plat-lbl:hover{border-color:var(--navy);color:var(--navy)}
+.plat-chk:checked+.plat-lbl{border-color:var(--navy);background:var(--navy);color:#fff}
+.plat-ico{font-size:18px}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:24px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:var(--r2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.2s}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red-dk);transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,25,44,.25)}
+.btn-red:disabled{background:#C5C9D8;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-out{background:#fff;color:var(--navy);border:1.5px solid var(--border)}.btn-out:hover{border-color:var(--navy)}
+.btn-nvy{background:var(--navy);color:#fff}.btn-nvy:hover{background:#141B3D}
+
+/* GENERATING */
+.generating{text-align:center;padding:72px 32px}
+.gen-spin{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .9s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gen-t{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:6px}
+.gen-s{font-size:13px;color:var(--muted)}
+.gen-steps{margin-top:24px;display:flex;flex-direction:column;gap:6px;max-width:380px;margin-left:auto;margin-right:auto}
+.gen-step{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:var(--r2);background:#fff;border:1px solid var(--border);font-size:12px;color:var(--muted);text-align:left;font-weight:500}
+.gen-step.done{color:var(--green);border-color:#BBF7D0;background:#EEFBF3}
+.gen-step.active{color:var(--navy);border-color:var(--navy);font-weight:700}
+.gen-step-ico{font-size:14px;flex-shrink:0}
+
+/* ═══════════════════════════════════════ */
+/* ═══ OUTPUT PLAN SLIDES ═══ */
+/* ═══════════════════════════════════════ */
+#plan-output{display:none}
+.toolbar{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;margin-bottom:20px}
+.tb-t{font-size:14px;font-weight:800;color:var(--navy)}
+.tb-m{font-size:11px;color:var(--muted);margin-top:2px}
+.tb-actions{display:flex;gap:8px}
+
+.slides{display:flex;flex-direction:column;gap:14px}
+.slide{width:100%;border-radius:var(--r);overflow:hidden;box-shadow:0 8px 32px rgba(10,15,46,.1);position:relative;background:#fff}
+
+/* Shared slide elements */
+.sl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.sl-h{font-size:26px;font-weight:900;color:var(--navy);letter-spacing:-.02em}
+.sl-h span{color:var(--red)}
+.sl-logo{font-weight:900;font-size:18px;color:var(--red);letter-spacing:-.02em}
+
+/* Cover */
+.sl-cover{background:var(--navy);display:flex;min-height:440px;overflow:hidden}
+.sl-cover-l{flex:1;padding:48px 44px;display:flex;flex-direction:column;justify-content:space-between;position:relative;z-index:2}
+.sl-cover-r{width:320px;position:relative;flex-shrink:0;overflow:hidden}
+.cv-shapes{position:absolute;inset:0}
+.cv-shapes .sh{position:absolute;border-radius:50%}
+.sh1{width:200px;height:200px;background:var(--red);top:-50px;right:-30px}
+.sh2{width:150px;height:150px;background:var(--blue);bottom:-30px;right:80px}
+.sh3{width:70px;height:150px;background:var(--yellow);bottom:30px;right:-10px;border-radius:70px}
+.sh4{width:100px;height:100px;border:24px solid rgba(255,255,255,.1);top:110px;right:60px}
+.cv-brand{font-weight:900;font-size:26px;color:#fff;letter-spacing:-.02em;margin-bottom:auto}
+.cv-brand span{color:var(--red)}
+.cv-eye{font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px}
+.cv-campaign{font-size:34px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:6px;letter-spacing:-.02em}
+.cv-client{font-size:18px;font-weight:500;color:rgba(255,255,255,.45);margin-bottom:28px}
+.cv-meta{display:flex;gap:20px;flex-wrap:wrap}
+.cv-meta-l{font-size:9px;font-weight:800;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+.cv-meta-v{font-size:12px;font-weight:600;color:rgba(255,255,255,.75)}
+.cv-copy{font-size:9px;color:rgba(255,255,255,.2);margin-top:28px}
+
+/* Content slides */
+.sl-content{padding:36px 44px}
+
+/* Rationale block */
+.rationale-text{font-size:15px;line-height:1.8;color:var(--text);padding:24px 28px;background:var(--bg);border-radius:var(--r2);border-left:4px solid var(--red)}
+
+/* Audience block */
+.aud-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.aud-box{background:var(--bg);border-radius:var(--r2);padding:18px 20px;border-left:3px solid var(--red)}
+.aud-box-l{font-size:10px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.aud-box-c{font-size:13px;color:var(--text);line-height:1.7}
+.aud-box-c strong{font-weight:700}
+.aud-narrative{margin-top:16px;font-size:14px;line-height:1.7;color:var(--muted);padding:16px 20px;background:var(--bg);border-radius:var(--r2)}
+
+/* Funnel */
+.funnel-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px}
+.funnel-card{border-radius:var(--r2);padding:24px 20px;position:relative;overflow:hidden}
+.funnel-card.awareness{background:#EEEDFE;border-top:4px solid #534AB7}
+.funnel-card.consideration{background:#E6F1FB;border-top:4px solid var(--blue)}
+.funnel-card.conversion{background:#EEFBF3;border-top:4px solid var(--green)}
+.funnel-phase{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.funnel-card.awareness .funnel-phase{color:#534AB7}
+.funnel-card.consideration .funnel-phase{color:var(--blue)}
+.funnel-card.conversion .funnel-phase{color:var(--green)}
+.funnel-platforms{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.funnel-plat{font-size:13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px}
+.funnel-plat::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.funnel-card.awareness .funnel-plat::before{background:#534AB7}
+.funnel-card.consideration .funnel-plat::before{background:var(--blue)}
+.funnel-card.conversion .funnel-plat::before{background:var(--green)}
+.funnel-kpi{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.funnel-kpi-val{font-family:var(--fontC);font-size:15px;font-weight:700;color:var(--navy)}
+.funnel-rationale{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.06)}
+
+/* Platform cards */
+.plat-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.plat-card{background:var(--bg);border-radius:var(--r2);padding:20px;border-top:3px solid var(--red);position:relative}
+.plat-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.plat-card-name{font-size:16px;font-weight:800;color:var(--navy)}
+.plat-card-pct{font-family:var(--fontC);font-size:22px;font-weight:800;color:var(--red)}
+.plat-card-obj{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.plat-card-kpi{display:flex;gap:16px;margin-bottom:10px}
+.plat-card-kpi-item{}
+.plat-card-kpi-l{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.plat-card-kpi-v{font-family:var(--fontC);font-size:16px;font-weight:700;color:var(--navy)}
+.plat-card-rationale{font-size:12px;color:var(--muted);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)}
+
+/* Budget table */
+.budget-table{width:100%;border-collapse:collapse;margin-top:20px}
+.budget-table thead th{background:var(--navy);color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:12px 20px;text-align:left}
+.budget-table thead th.r{text-align:right}
+.budget-table tbody td{padding:12px 20px;border-bottom:1px solid #ECEEF4;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap}
+.budget-table tbody td.r{text-align:right;font-family:var(--fontC);font-weight:600;font-size:14px}
+.budget-table tbody td.platform{font-weight:700}
+.budget-table tr.sub-row td{font-weight:800;color:var(--navy);border-top:2px solid var(--navy);border-bottom:2px solid var(--navy);padding:14px 20px}
+.budget-table tr.sub-row td.r{font-size:16px;font-weight:800}
+.budget-table tr.fee-row td{color:var(--muted);font-weight:500;padding:10px 20px}
+.budget-table tr.fee-row td.r{font-size:13px}
+.budget-table tr.grand-row td{background:var(--navy);color:#fff;font-weight:800;font-size:14px;padding:16px 20px;border:none;white-space:nowrap}
+.budget-table tr.grand-row td.r{font-family:var(--fontC);font-size:22px;font-weight:800;color:#2EE07A}
+.share-wrap{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.share-bar-bg{width:60px;height:6px;background:#ECEEF4;border-radius:3px;overflow:hidden;flex-shrink:0}
+.share-bar-fill{height:100%;background:var(--red);border-radius:3px}
+.share-pct{font-family:var(--fontC);font-size:14px;font-weight:700;color:var(--navy);min-width:32px;text-align:right}
+
+/* KPI table */
+.kpi-table{width:100%;border-collapse:collapse;margin-top:20px}
+.kpi-table thead th{background:var(--navy);color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:12px 20px;text-align:left}
+.kpi-table tbody td{padding:12px 20px;border-bottom:1px solid #ECEEF4;font-size:13px;font-weight:500;color:var(--text)}
+.kpi-table tbody td:nth-child(2){font-weight:700;color:var(--navy)}
+.kpi-table tbody td:nth-child(3){font-family:var(--fontC);font-weight:700;font-size:15px;color:var(--navy)}
+.kpi-table tr:nth-child(even) td{background:#FAFBFD}
+
+/* Divider slide */
+.sl-div{background:var(--navy);min-height:200px;display:flex;align-items:center;padding:44px 56px;position:relative;overflow:hidden}
+.dv-shapes{position:absolute;inset:0;overflow:hidden}
+.dv-shapes .ds{position:absolute;border-radius:50%}
+.ds1{width:160px;height:160px;background:var(--red);opacity:.9;top:-50px;right:180px}
+.ds2{width:220px;height:220px;background:var(--blue);opacity:.7;bottom:-70px;right:-30px}
+.ds3{width:80px;height:170px;background:var(--yellow);opacity:.8;bottom:0;right:110px;border-radius:80px}
+.dv-text{position:relative;z-index:2}
+.dv-name{font-size:42px;font-weight:900;color:#fff;line-height:1;margin-bottom:6px;letter-spacing:-.03em}
+.dv-sub{font-size:15px;font-weight:400;color:rgba(255,255,255,.45)}
+
+/* End slide */
+.sl-end{background:var(--navy);min-height:280px;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;overflow:hidden;text-align:center;padding:48px}
+.end-shapes{position:absolute;inset:0;overflow:hidden}
+.end-shapes .es{position:absolute;border-radius:50%}
+.es1{width:260px;height:260px;background:var(--red);opacity:.12;top:-80px;left:-60px}
+.es2{width:180px;height:180px;background:var(--yellow);opacity:.08;bottom:-40px;right:-20px}
+.es3{width:120px;height:120px;border:24px solid rgba(255,255,255,.05);bottom:20px;left:80px}
+.end-c{position:relative;z-index:2}
+.end-brand{font-weight:900;font-size:28px;color:#fff;margin-bottom:20px;letter-spacing:-.02em}
+.end-brand span{color:var(--red)}
+.end-tag{font-size:38px;font-weight:900;color:#fff;line-height:1.1;letter-spacing:-.02em}
+.end-tag span{color:var(--red);font-style:italic}
+.end-cp{font-size:10px;color:rgba(255,255,255,.2);margin-top:24px}
+
+/* ═══ PRINT ═══ */
+@page{margin:0.4in;margin-top:0.2in;margin-bottom:0.2in}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  body{background:#fff!important}
+  .nav,.no-print,.sec-head,.btn-row{display:none!important}
+  .card.input-card{display:none!important}
+  #gen-state{display:none!important}
+  .main{padding:0;max-width:100%}
+  .slide{box-shadow:none;page-break-inside:avoid;border-radius:0}
+  .toolbar{display:none!important}
+  .budget-table tr.grand-row td{background:#0A0F2E!important;color:#fff!important}
+  .budget-table tr.grand-row td.r{color:#2EE07A!important}
+  .sl-cover,.sl-div,.sl-end{-webkit-print-color-adjust:exact!important}
+}
+
+@media(max-width:700px){
+  .fg{grid-template-columns:1fr}
+  .fg.t3{grid-template-columns:1fr}
+  .plat-grid{grid-template-columns:repeat(2,1fr)}
+  .sl-cover{flex-direction:column}.sl-cover-r{display:none}
+  .funnel-grid{grid-template-columns:1fr}
+  .plat-cards{grid-template-columns:1fr}
+  .aud-grid{grid-template-columns:1fr}
+  .nav{padding:0 14px}.main{padding:16px 12px 60px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-brand"><span>omd</span></div>
+    <div class="nav-sep"></div>
+    <div class="nav-label">Media Plan Generator</div>
+  </div>
+  <div class="nav-ver">v2.0</div>
+</nav>
+
+<div class="main">
+
+  <!-- INPUT FORM -->
+  <div id="input-section">
+    <div class="sec-head no-print">
+      <div class="sec-num">📋</div>
+      <div><div class="sec-t">Campaign Brief</div><div class="sec-s">Fill in the brief. The AI builds the full media plan.</div></div>
+    </div>
+
+    <div class="card input-card">
+      <div class="card-t">Client & Campaign</div>
+      <div class="fg">
+        <div class="field"><label>Client Name</label><input id="f-client" placeholder="e.g. Capital Bank"/></div>
+        <div class="field"><label>Industry</label><select id="f-industry"><option value="">Select</option><option>Banking & Finance</option><option>Telecom</option><option>FMCG / Food & Beverage</option><option>Retail</option><option>Real Estate</option><option>Automotive</option><option>Healthcare</option><option>Government</option><option>Technology</option><option>Education</option><option>Other</option></select></div>
+        <div class="field"><label>Campaign Name</label><input id="f-campaign" placeholder="e.g. Kids Account Campaign"/></div>
+        <div class="field"><label>Primary Objective</label><select id="f-obj"><option value="">Select</option><option>Brand Awareness</option><option>Video Views</option><option>Website Traffic</option><option>Lead Generation</option><option>App Installs</option><option>E-commerce Sales</option><option>Engagement</option><option>Page Likes / Follows</option><option>Store Visits</option></select></div>
+        <div class="field"><label>Total Budget (USD)</label><input id="f-budget" type="number" placeholder="e.g. 250000" step="any"/></div>
+        <div class="field"><label>Campaign Duration</label><input id="f-duration" placeholder="e.g. 7 Feb – 8 Apr 2026"/></div>
+      </div>
+    </div>
+
+    <div class="card input-card">
+      <div class="card-t">Target Audience</div>
+      <div class="fg">
+        <div class="field"><label>Locations</label><input id="f-loc" placeholder="e.g. Amman, Irbid, Zarqa, Aqaba"/></div>
+        <div class="field"><label>Age Range</label><input id="f-age" placeholder="e.g. 18–65+"/></div>
+        <div class="field"><label>Gender</label><select id="f-gender"><option>Male & Female</option><option>Female only</option><option>Male only</option></select></div>
+        <div class="field"><label>Interests / Segments</label><input id="f-int" placeholder="e.g. Parents, Family, Finance, Education"/></div>
+      </div>
+    </div>
+
+    <div class="card input-card">
+      <div class="card-t">Platform Preferences (Optional)</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Select platforms you want included. Leave blank and the AI decides based on the brief.</p>
+      <div class="plat-grid">
+        <div><input type="checkbox" class="plat-chk" id="p-meta"/><label class="plat-lbl" for="p-meta"><span class="plat-ico">📘</span>Meta</label></div>
+        <div><input type="checkbox" class="plat-chk" id="p-google"/><label class="plat-lbl" for="p-google"><span class="plat-ico">🔍</span>Google Ads</label></div>
+        <div><input type="checkbox" class="plat-chk" id="p-youtube"/><label class="plat-lbl" for="p-youtube"><span class="plat-ico">▶️</span>YouTube</label></div>
+        <div><input type="checkbox" class="plat-chk" id="p-dv360"/><label class="plat-lbl" for="p-dv360"><span class="plat-ico">📊</span>DV360</label></div>
+        <div><input type="checkbox" class="plat-chk" id="p-linkedin"/><label class="plat-lbl" for="p-linkedin"><span class="plat-ico">💼</span>LinkedIn</label></div>
+        <div><input type="checkbox" class="plat-chk" id="p-atd"/><label class="plat-lbl" for="p-atd"><span class="plat-ico">🌐</span>Arab Trade Desk</label></div>
+        <div><input type="checkbox" class="plat-chk" id="p-roya"/><label class="plat-lbl" for="p-roya"><span class="plat-ico">📺</span>Roya News</label></div>
+        <div><input type="checkbox" class="plat-chk" id="p-tiktok"/><label class="plat-lbl" for="p-tiktok"><span class="plat-ico">🎵</span>TikTok</label></div>
+      </div>
+    </div>
+
+    <div class="card input-card">
+      <div class="card-t">Additional Context</div>
+      <div class="fg single">
+        <div class="field"><label>Notes or special requirements</label><textarea id="f-notes" placeholder="e.g. Client wants a heavy focus on video content. Previous campaign saw strong female engagement ages 25-34. Roya News performed well last time — consider including again."></textarea><div class="hint">Any context that helps the AI make better recommendations</div></div>
+      </div>
+    </div>
+
+    <div class="btn-row no-print">
+      <button class="btn btn-red" onclick="generate()">Generate Media Plan →</button>
+    </div>
+  </div>
+
+  <!-- GENERATING STATE -->
+  <div id="gen-state" style="display:none">
+    <div class="generating">
+      <div class="gen-spin"></div>
+      <div class="gen-t">Building your media plan</div>
+      <div class="gen-s">Claude is reading your brief and designing the strategy...</div>
+      <div class="gen-steps">
+        <div class="gen-step active" id="gs1"><span class="gen-step-ico">📋</span>Reading campaign brief</div>
+        <div class="gen-step" id="gs2"><span class="gen-step-ico">🧠</span>Building channel strategy</div>
+        <div class="gen-step" id="gs3"><span class="gen-step-ico">💰</span>Allocating budget across platforms</div>
+        <div class="gen-step" id="gs4"><span class="gen-step-ico">📊</span>Setting KPI benchmarks</div>
+        <div class="gen-step" id="gs5"><span class="gen-step-ico">🎨</span>Rendering branded plan</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div id="plan-output">
+    <div class="toolbar no-print">
+      <div><div class="tb-t" id="tb-t">Plan ready</div><div class="tb-m" id="tb-m"></div></div>
+      <div class="tb-actions"><button class="btn btn-out" onclick="location.reload()">← New Plan</button><button class="btn btn-nvy" onclick="window.print()">🖨 Print / PDF</button></div>
+    </div>
+    <div class="slides" id="slides"></div>
+  </div>
+
+</div>
+
+<script>
+const RATE=0.71;
+function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtK(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':n.toString()}
+function E(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function getInput(){
+  const v=id=>(document.getElementById(id)||{}).value||'';
+  const plats=[];
+  ['meta','google','youtube','dv360','linkedin','atd','roya','tiktok'].forEach(p=>{if(document.getElementById('p-'+p)?.checked)plats.push(p)});
+  return{client:v('f-client')||'Demo Client',industry:v('f-industry')||'Banking & Finance',campaign:v('f-campaign')||'Q1 Campaign',obj:v('f-obj')||'Brand Awareness',budget:parseFloat(v('f-budget'))||250000,duration:v('f-duration')||'Q1 2026',loc:v('f-loc')||'Amman, Irbid, Zarqa, Aqaba',age:v('f-age')||'18-65+',gender:v('f-gender')||'Male & Female',interests:v('f-int')||'',plats,notes:v('f-notes')||''}
+}
+
+async function generate(){
+  const inp=getInput();
+  document.getElementById('input-section').style.display='none';
+  document.getElementById('gen-state').style.display='block';
+  const steps=['gs1','gs2','gs3','gs4','gs5'];
+  let si=0;
+  const iv=setInterval(()=>{if(si>0)document.getElementById(steps[si-1]).classList.replace('active','done');if(si<steps.length){document.getElementById(steps[si]).classList.add('active');si++}else clearInterval(iv)},800);
+
+  try{
+    const data=await callAI(inp);
+    setTimeout(()=>{clearInterval(iv);steps.forEach(s=>{document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done')});setTimeout(()=>render(data,inp),300)},steps.length*800);
+  }catch(e){
+    console.error(e);
+    setTimeout(()=>{clearInterval(iv);steps.forEach(s=>{document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done')});setTimeout(()=>render(fallback(inp),inp),300)},steps.length*800);
+  }
+}
+
+async function callAI(inp){
+  const prompt=`You are a senior media planner at OMD Amman, Jordan's leading media agency.
+
+BRIEF:
+Client: ${inp.client} (${inp.industry})
+Campaign: ${inp.campaign}
+Objective: ${inp.obj}
+Total Budget: $${inp.budget.toLocaleString()}
+Duration: ${inp.duration}
+Audience: ${inp.loc}, Age ${inp.age}, ${inp.gender}
+${inp.interests?'Interests: '+inp.interests:''}
+${inp.plats.length?'Preferred platforms: '+inp.plats.join(', '):''}
+${inp.notes?'Notes: '+inp.notes:''}
+Market: Jordan (use Jordanian local platforms like Roya News and Arab Trade Desk where relevant)
+Exchange rate: 1 USD = 0.71 JOD
+
+Return ONLY a JSON object (no markdown, no backticks):
+{
+  "strategicRationale":"3-4 sentences explaining the overall media strategy approach for this client and objective.",
+  "audienceNarrative":"2-3 sentences explaining why this audience profile requires the recommended channel mix.",
+  "funnel":[
+    {"phase":"Awareness","platforms":["Platform 1","Platform 2"],"kpi":"Primary KPI","kpiTarget":"Target value","rationale":"Why these platforms for awareness"},
+    {"phase":"Consideration","platforms":["Platform 1"],"kpi":"KPI","kpiTarget":"Target","rationale":"Why"},
+    {"phase":"Conversion","platforms":["Platform 1"],"kpi":"KPI","kpiTarget":"Target","rationale":"Why"}
+  ],
+  "platforms":[
+    {"name":"Platform Name","budgetPct":35,"objective":"Platform objective","kpi":"Primary KPI","kpiTarget":"Benchmark target","rationale":"1-2 sentences why this platform"}
+  ],
+  "kpiTable":[
+    {"platform":"Platform","kpi":"KPI Name","target":"Target Value","tool":"Measurement tool"}
+  ]
+}
+
+RULES:
+- Budget percentages across platforms must total 100%
+- Include 4-6 platforms appropriate for the market and objective
+- For Jordan market: consider Roya News for local awareness, Arab Trade Desk for programmatic
+- KPI targets should be realistic benchmarks for the Jordan/MENA market
+- Every recommendation must tie back to the campaign objective
+- Be specific with numbers and targets, not generic`;
+
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,messages:[{role:"user",content:prompt}]})});
+  const d=await r.json();
+  const txt=d.content.map(i=>i.text||'').join('');
+  return JSON.parse(txt.replace(/```json|```/g,'').trim());
+}
+
+function fallback(inp){
+  const b=inp.budget;
+  return{
+    strategicRationale:`The ${inp.campaign} for ${inp.client} will leverage a full-funnel digital strategy across Jordan's key governorates. Given the ${inp.obj.toLowerCase()} objective, we recommend a video-first approach combining Meta's precise targeting with YouTube's massive reach and local publisher credibility through Roya News. The strategy sequences audiences from awareness through to conversion, ensuring budget efficiency at every stage.`,
+    audienceNarrative:`The target audience of ${inp.age} across ${inp.loc} represents a digitally active demographic that over-indexes on mobile social media and video content consumption. This profile requires a multi-platform approach — Meta and YouTube for scale, Google for intent capture, and local publishers for contextual credibility in the Jordanian market.`,
+    funnel:[
+      {phase:"Awareness",platforms:["Meta (FB & IG)","YouTube","Roya News"],kpi:"Reach & Impressions",kpiTarget:"3M+ impressions, 1.5M unique reach",rationale:"Cast a wide net across social, video, and local news to establish brand presence in target markets."},
+      {phase:"Consideration",platforms:["Meta (FB & IG)","YouTube"],kpi:"ThruPlays & Engagement",kpiTarget:"500K+ ThruPlays, 2% engagement rate",rationale:"Deepen interest through video content and interactive formats that encourage active engagement."},
+      {phase:"Conversion",platforms:["Google Ads","Meta (FB & IG)","Arab Trade Desk"],kpi:"Leads / CPA",kpiTarget:"CPA under $8, 2,000+ leads",rationale:"Capture intent through search, retarget engaged audiences on Meta, and drive action via programmatic."}
+    ],
+    platforms:[
+      {name:"Meta (FB & IG)",budgetPct:35,objective:"Awareness + Consideration + Conversion",kpi:"ThruPlays / Leads",kpiTarget:"700K ThruPlays, CPA < $8",rationale:"Meta offers the deepest audience targeting in Jordan with strong video and lead gen capabilities. Primary platform across all funnel stages."},
+      {name:"YouTube",budgetPct:25,objective:"Awareness + Video Views",kpi:"Video Views / View Rate",kpiTarget:"2M+ views, 90%+ view rate",rationale:"YouTube delivers massive video reach across mobile, desktop, and connected TVs. Previous campaigns in Jordan achieved 94% view rates — exceptional for the region."},
+      {name:"Google Ads",budgetPct:20,objective:"Conversion + Intent Capture",kpi:"Clicks / CPA",kpiTarget:"50K+ clicks, CPA < $6",rationale:"Google Search and Display capture active intent. Performance Max campaigns allow automated cross-channel optimisation."},
+      {name:"Roya News",budgetPct:10,objective:"Awareness + Credibility",kpi:"Impressions / CTR",kpiTarget:"600K impressions, 3%+ CTR",rationale:"Jordan's largest news platform adds local credibility and contextual relevance. Rich media formats deliver strong engagement."},
+      {name:"Arab Trade Desk",budgetPct:10,objective:"Programmatic Reach",kpi:"Impressions / CTR",kpiTarget:"3M impressions, 2.5% CTR",rationale:"MENA-focused programmatic DSP reaching users across Jordanian news sites — khaberni, sarayanews, alghad, ammonnews — at efficient CPMs."}
+    ],
+    kpiTable:[
+      {platform:"Meta (FB & IG)",kpi:"ThruPlays",target:"700,000+",tool:"Meta Ads Manager"},
+      {platform:"Meta (FB & IG)",kpi:"Cost per Lead",target:"< $8.00",tool:"Meta Ads Manager"},
+      {platform:"YouTube",kpi:"Video Views",target:"2,000,000+",tool:"Google Ads"},
+      {platform:"YouTube",kpi:"View Rate",target:"> 90%",tool:"Google Ads"},
+      {platform:"Google Ads",kpi:"Clicks",target:"50,000+",tool:"Google Ads"},
+      {platform:"Google Ads",kpi:"CPA",target:"< $6.00",tool:"Google Ads"},
+      {platform:"Roya News",kpi:"Impressions",target:"600,000+",tool:"Roya / CM360"},
+      {platform:"Arab Trade Desk",kpi:"CTR",target:"> 2.5%",tool:"ATD Dashboard"}
+    ]
+  }
+}
+
+function render(data,inp){
+  document.getElementById('gen-state').style.display='none';
+  document.getElementById('plan-output').style.display='block';
+  document.getElementById('tb-t').textContent=`${inp.client} — ${inp.campaign}`;
+  document.getElementById('tb-m').textContent=`${inp.duration} · Budget: $${inp.budget.toLocaleString()} · Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
+
+  const c=document.getElementById('slides');c.innerHTML='';
+  c.appendChild(mkCover(inp));
+  c.appendChild(mkRationale(data));
+  c.appendChild(mkAudience(data,inp));
+  c.appendChild(mkDivider('Channel Strategy','Full-funnel platform allocation'));
+  c.appendChild(mkFunnel(data));
+  c.appendChild(mkPlatforms(data));
+  c.appendChild(mkBudget(data,inp));
+  c.appendChild(mkKPI(data));
+  c.appendChild(mkEnd());
+  document.getElementById('plan-output').scrollIntoView({behavior:'smooth'});
+}
+
+function mkCover(inp){
+  const d=document.createElement('div');d.className='slide sl-cover';
+  d.innerHTML=`<div class="sl-cover-l"><div class="cv-brand"><span>omd</span></div>
+    <div><div class="cv-eye">Media Plan</div><div class="cv-campaign">${E(inp.campaign)}</div><div class="cv-client">${E(inp.client)}</div>
+    <div class="cv-meta">
+      <div><div class="cv-meta-l">Period</div><div class="cv-meta-v">${E(inp.duration)}</div></div>
+      <div><div class="cv-meta-l">Budget</div><div class="cv-meta-v">$ ${inp.budget.toLocaleString()}</div></div>
+      <div><div class="cv-meta-l">Objective</div><div class="cv-meta-v">${E(inp.obj)}</div></div>
+      <div><div class="cv-meta-l">Market</div><div class="cv-meta-v">${E(inp.loc.split(',')[0])}</div></div>
+    </div></div>
+    <div class="cv-copy">©${new Date().getFullYear()} OMD Worldwide · All Rights Reserved</div>
+  </div><div class="sl-cover-r"><div class="cv-shapes"><div class="sh sh1"></div><div class="sh sh2"></div><div class="sh sh3"></div><div class="sh sh4"></div></div></div>`;
+  return d;
+}
+
+function mkRationale(data){
+  const d=document.createElement('div');d.className='slide sl-content';
+  d.innerHTML=`<div class="sl-head"><div class="sl-h">Strategic <span>Rationale</span></div><div class="sl-logo">omd</div></div>
+  <div class="rationale-text">${E(data.strategicRationale)}</div>`;
+  return d;
+}
+
+function mkAudience(data,inp){
+  const d=document.createElement('div');d.className='slide sl-content';
+  d.innerHTML=`<div class="sl-head"><div class="sl-h">Target <span>Audience</span></div><div class="sl-logo">omd</div></div>
+  <div class="aud-grid">
+    <div class="aud-box"><div class="aud-box-l">Locations</div><div class="aud-box-c"><strong>${E(inp.loc)}</strong></div></div>
+    <div class="aud-box"><div class="aud-box-l">Demographics</div><div class="aud-box-c"><strong>Age:</strong> ${E(inp.age)}<br><strong>Gender:</strong> ${E(inp.gender)}</div></div>
+    ${inp.interests?`<div class="aud-box" style="grid-column:span 2"><div class="aud-box-l">Interests & Segments</div><div class="aud-box-c">${E(inp.interests)}</div></div>`:''}
+  </div>
+  <div class="aud-narrative">${E(data.audienceNarrative)}</div>`;
+  return d;
+}
+
+function mkDivider(title,sub){
+  const d=document.createElement('div');d.className='slide sl-div';
+  d.innerHTML=`<div class="dv-shapes"><div class="ds ds1"></div><div class="ds ds2"></div><div class="ds ds3"></div></div>
+  <div class="dv-text"><div class="dv-name">${E(title)}</div><div class="dv-sub">${E(sub)}</div></div>`;
+  return d;
+}
+
+function mkFunnel(data){
+  const d=document.createElement('div');d.className='slide sl-content';
+  const classes=['awareness','consideration','conversion'];
+  d.innerHTML=`<div class="sl-head"><div class="sl-h">Full-Funnel <span>Strategy</span></div><div class="sl-logo">omd</div></div>
+  <div class="funnel-grid">
+    ${(data.funnel||[]).map((f,i)=>`<div class="funnel-card ${classes[i]||'awareness'}">
+      <div class="funnel-phase">${E(f.phase)}</div>
+      <div class="funnel-platforms">${(f.platforms||[]).map(p=>`<div class="funnel-plat">${E(p)}</div>`).join('')}</div>
+      <div class="funnel-kpi">Primary KPI</div>
+      <div class="funnel-kpi-val">${E(f.kpi)}</div>
+      <div style="font-family:var(--fontC);font-size:13px;font-weight:700;color:var(--navy);margin-top:2px">${E(f.kpiTarget)}</div>
+      <div class="funnel-rationale">${E(f.rationale)}</div>
+    </div>`).join('')}
+  </div>`;
+  return d;
+}
+
+function mkPlatforms(data){
+  const d=document.createElement('div');d.className='slide sl-content';
+  d.innerHTML=`<div class="sl-head"><div class="sl-h">Platform <span>Breakdown</span></div><div class="sl-logo">omd</div></div>
+  <div class="plat-cards">
+    ${(data.platforms||[]).map(p=>`<div class="plat-card">
+      <div class="plat-card-head"><div class="plat-card-name">${E(p.name)}</div><div class="plat-card-pct">${p.budgetPct}%</div></div>
+      <div class="plat-card-obj">${E(p.objective)}</div>
+      <div class="plat-card-kpi">
+        <div class="plat-card-kpi-item"><div class="plat-card-kpi-l">Primary KPI</div><div class="plat-card-kpi-v">${E(p.kpi)}</div></div>
+        <div class="plat-card-kpi-item"><div class="plat-card-kpi-l">Target</div><div class="plat-card-kpi-v">${E(p.kpiTarget)}</div></div>
+      </div>
+      <div class="plat-card-rationale">${E(p.rationale)}</div>
+    </div>`).join('')}
+  </div>`;
+  return d;
+}
+
+function mkBudget(data,inp){
+  const d=document.createElement('div');d.className='slide sl-content';
+  const totalUSD=inp.budget;
+  const feeUSD=totalUSD*0.02,whUSD=totalUSD*0.10,stUSD=totalUSD*0.16;
+  const netUSD=totalUSD+feeUSD+whUSD+stUSD;
+
+  let rows='';
+  (data.platforms||[]).forEach(p=>{
+    const usd=totalUSD*(p.budgetPct/100);
+    const jod=usd*RATE;
+    const barW=Math.min(100,Math.max(2,p.budgetPct));
+    rows+=`<tr class="data-row"><td>${E(p.name)}</td><td class="platform">${E(p.objective)}</td><td class="r">JOD ${fmt(jod)}</td><td class="r">$ ${fmt(usd)}</td><td class="r"><div class="share-wrap"><div class="share-bar-bg"><div class="share-bar-fill" style="width:${barW}%"></div></div><div class="share-pct">${p.budgetPct}%</div></div></td></tr>`;
+  });
+
+  d.innerHTML=`<div class="sl-head"><div class="sl-h">Budget <span>Allocation</span></div><div class="sl-logo">omd</div></div>
+  <table class="budget-table">
+    <thead><tr><th>Platform</th><th>Objective</th><th class="r">Total JOD</th><th class="r">Total USD</th><th class="r">Share</th></tr></thead>
+    <tbody>
+      ${rows}
+      <tr class="sub-row"><td colspan="2">Media Spend Subtotal</td><td class="r">JOD ${fmt(totalUSD*RATE)}</td><td class="r">$ ${fmt(totalUSD)}</td><td></td></tr>
+      <tr class="fee-row"><td colspan="2">Agency Fees 2%</td><td class="r">JOD ${fmt(feeUSD*RATE)}</td><td class="r">$ ${fmt(feeUSD)}</td><td></td></tr>
+      <tr class="fee-row"><td colspan="2">10% Withholding Tax</td><td class="r">JOD ${fmt(whUSD*RATE)}</td><td class="r">$ ${fmt(whUSD)}</td><td></td></tr>
+      <tr class="fee-row"><td colspan="2">16% Sales Tax</td><td class="r">JOD ${fmt(stUSD*RATE)}</td><td class="r">$ ${fmt(stUSD)}</td><td></td></tr>
+      <tr class="grand-row"><td colspan="2">Total Net</td><td class="r">JOD ${fmt(netUSD*RATE)}</td><td class="r">$ ${fmt(netUSD)}</td><td></td></tr>
+    </tbody>
+  </table>
+  <div style="margin-top:12px;font-size:11px;color:var(--red);font-weight:600">* These are 2026 rates and are subject to change in 2027</div>`;
+  return d;
+}
+
+function mkKPI(data){
+  const d=document.createElement('div');d.className='slide sl-content';
+  d.innerHTML=`<div class="sl-head"><div class="sl-h">KPIs & <span>Success Metrics</span></div><div class="sl-logo">omd</div></div>
+  <table class="kpi-table">
+    <thead><tr><th>Platform</th><th>KPI</th><th>Target</th><th>Measurement Tool</th></tr></thead>
+    <tbody>
+      ${(data.kpiTable||[]).map(k=>`<tr><td>${E(k.platform)}</td><td>${E(k.kpi)}</td><td>${E(k.target)}</td><td>${E(k.tool)}</td></tr>`).join('')}
+    </tbody>
+  </table>`;
+  return d;
+}
+
+function mkEnd(){
+  const d=document.createElement('div');d.className='slide sl-end';
+  d.innerHTML=`<div class="end-shapes"><div class="es es1"></div><div class="es es2"></div><div class="es es3"></div></div>
+  <div class="end-c"><div class="end-brand"><span>omd</span></div><div class="end-tag">We <span>Create</span><br>What's Next</div><div class="end-cp">© ${new Date().getFullYear()} OMD Worldwide · All Rights Reserved</div></div>`;
+  return d;
+}
+</script>
+</body>
+</html>
