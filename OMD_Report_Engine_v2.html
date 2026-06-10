@@ -444,7 +444,7 @@ function getCtx(){
   const v=id=>(document.getElementById(id)||{}).value||'';
   const plats=[];['meta','google','youtube','dv360','linkedin','atd','roya','other'].forEach(p=>{if(document.getElementById('p-'+p)?.checked)plats.push(p)});
   const kpis=[];document.querySelectorAll('.kpi-row').forEach(r=>{const n=r.querySelector('.kpi-name')?.value;const t=r.querySelector('.kpi-target')?.value;if(n&&t)kpis.push({metric:n,target:t})});
-  return{client:v('f-client')||'Capital Bank',industry:v('f-industry')||'Banking & Finance',campaign:v('f-campaign')||'Kids Account Campaign',period:v('f-period')||'7 Feb – 8 Apr 2026',compare:v('f-compare'),budget:v('f-budget'),loc:v('f-loc')||'Amman, Irbid, Zarqa, Aqaba',age:v('f-age')||'18–65+',gender:v('f-gender')||'Male & Female',interests:v('f-int'),obj:v('f-obj')||'Brand Awareness',tone:v('f-tone')||'positive',pri:v('f-pri'),iss:v('f-iss'),plats,kpis}
+  return{client:v('f-client')||'Arab Bank',industry:v('f-industry')||'Banking & Finance',campaign:v('f-campaign')||'Kids Account Campaign',period:v('f-period')||'7 Feb – 8 Apr 2026',compare:v('f-compare'),budget:v('f-budget'),loc:v('f-loc')||'Amman, Irbid, Zarqa, Aqaba',age:v('f-age')||'18–65+',gender:v('f-gender')||'Male & Female',interests:v('f-int'),obj:v('f-obj')||'Brand Awareness',tone:v('f-tone')||'positive',pri:v('f-pri'),iss:v('f-iss'),plats,kpis}
 }
 
 // ═══ GENERATE ═══
