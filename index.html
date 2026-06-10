@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OMD AI — Workflow System</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0A0F2E;--red:#E8192C;--red-dk:#C01020;--blue:#2B4AE0;--yellow:#F5A800;--bg:#F5F6FA;--white:#fff;--border:#E0E3EE;--muted:#7A7F9C;--text:#0A0F2E;--green:#0FAA58;--font:'Barlow',sans-serif;--fontC:'Barlow Condensed',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.nav{background:var(--navy);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-brand{font-weight:900;font-size:24px;color:#fff;letter-spacing:-.02em}
+.nav-brand span{color:var(--red)}
+.nav-right{display:flex;align-items:center;gap:24px}
+.nav-link{font-size:13px;font-weight:600;color:rgba(255,255,255,.5);text-decoration:none;letter-spacing:.04em;transition:.2s}
+.nav-link:hover{color:#fff}
+.nav-badge{font-size:11px;font-weight:700;background:var(--red);color:#fff;padding:4px 12px;border-radius:20px;letter-spacing:.04em}
+
+/* HERO */
+.hero{background:var(--navy);padding:80px 48px 100px;position:relative;overflow:hidden}
+.hero-shapes{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-shapes .hs{position:absolute;border-radius:50%}
+.hs1{width:500px;height:500px;background:var(--red);opacity:.07;top:-150px;right:-100px}
+.hs2{width:300px;height:300px;background:var(--blue);opacity:.08;bottom:-80px;right:200px}
+.hs3{width:200px;height:400px;background:var(--yellow);opacity:.05;bottom:0;right:-40px;border-radius:200px}
+.hs4{width:160px;height:160px;border:32px solid rgba(255,255,255,.04);top:60px;right:320px}
+.hero-inner{max-width:1080px;margin:0 auto;position:relative;z-index:2}
+.hero-eyebrow{font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.14em;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.hero-eyebrow::before{content:'';width:24px;height:2px;background:var(--red)}
+.hero-title{font-size:56px;font-weight:900;color:#fff;line-height:1.05;letter-spacing:-.03em;margin-bottom:20px;max-width:700px}
+.hero-title span{color:var(--red)}
+.hero-sub{font-size:18px;font-weight:400;color:rgba(255,255,255,.5);line-height:1.7;max-width:560px;margin-bottom:40px}
+.hero-stats{display:flex;gap:48px;flex-wrap:wrap}
+.hero-stat-num{font-family:var(--fontC);font-size:42px;font-weight:800;color:#fff;line-height:1}
+.hero-stat-label{font-size:13px;font-weight:500;color:rgba(255,255,255,.4);margin-top:4px}
+
+/* TOOLS SECTION */
+.tools-section{max-width:1080px;margin:0 auto;padding:64px 48px}
+.section-eyebrow{font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.14em;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-eyebrow::before{content:'';width:24px;height:2px;background:var(--red)}
+.section-title{font-size:36px;font-weight:900;color:var(--navy);letter-spacing:-.02em;margin-bottom:8px}
+.section-title span{color:var(--red)}
+.section-sub{font-size:15px;color:var(--muted);margin-bottom:48px;max-width:500px;line-height:1.6}
+
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+
+.tool-card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(10,15,46,.06);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
+.tool-card:hover{transform:translateY(-4px);box-shadow:0 20px 56px rgba(10,15,46,.12)}
+.tool-card-top{padding:32px 28px 24px;flex:1}
+.tool-num{font-family:var(--fontC);font-size:13px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.tool-num::before{content:'';width:16px;height:2px;background:var(--red)}
+.tool-icon{font-size:36px;margin-bottom:16px}
+.tool-name{font-size:22px;font-weight:900;color:var(--navy);letter-spacing:-.02em;margin-bottom:8px}
+.tool-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.tool-saves{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--bg);border-radius:8px;margin-bottom:0}
+.tool-saves-num{font-family:var(--fontC);font-size:20px;font-weight:800;color:var(--green)}
+.tool-saves-label{font-size:12px;color:var(--muted);font-weight:500;line-height:1.4}
+.tool-features{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.tool-feature{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);font-weight:500}
+.tool-feature::before{content:'✓';color:var(--green);font-weight:800;flex-shrink:0;margin-top:1px}
+.tool-card-bottom{padding:20px 28px;border-top:1px solid var(--border);background:var(--bg)}
+.tool-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:var(--navy);color:#fff;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:700;text-decoration:none;transition:.2s;letter-spacing:.02em}
+.tool-btn:hover{background:var(--red)}
+.tool-btn span{font-size:16px}
+
+/* IMPACT SECTION */
+.impact-section{background:var(--navy);padding:64px 48px;position:relative;overflow:hidden}
+.impact-shapes{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.impact-shapes .is{position:absolute;border-radius:50%}
+.is1{width:300px;height:300px;background:var(--red);opacity:.07;top:-80px;left:-60px}
+.is2{width:200px;height:200px;background:var(--yellow);opacity:.05;bottom:-40px;right:100px}
+.impact-inner{max-width:1080px;margin:0 auto;position:relative;z-index:2}
+.impact-eyebrow{font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.14em;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.impact-eyebrow::before{content:'';width:24px;height:2px;background:var(--red)}
+.impact-title{font-size:36px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:48px}
+.impact-title span{color:var(--red)}
+.impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.impact-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:28px 24px}
+.impact-num{font-family:var(--fontC);font-size:48px;font-weight:800;color:var(--red);line-height:1;margin-bottom:8px}
+.impact-num.green{color:#2EE07A}
+.impact-label{font-size:14px;font-weight:500;color:rgba(255,255,255,.5);line-height:1.5}
+
+/* HOW IT WORKS */
+.how-section{max-width:1080px;margin:0 auto;padding:64px 48px}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:40px;position:relative}
+.steps-grid::before{content:'';position:absolute;top:28px;left:calc(16.66% + 20px);right:calc(16.66% + 20px);height:2px;background:var(--border);z-index:0}
+.how-step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px;position:relative;z-index:1}
+.how-step-num{width:56px;height:56px;border-radius:50%;background:var(--navy);color:#fff;font-family:var(--fontC);font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:20px;border:3px solid var(--bg)}
+.how-step-title{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.how-step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* FOOTER */
+.footer{background:var(--navy);padding:32px 48px;display:flex;align-items:center;justify-content:space-between}
+.footer-brand{font-weight:900;font-size:18px;color:#fff}
+.footer-brand span{color:var(--red)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.25)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .tools-grid{grid-template-columns:1fr}
+  .impact-grid{grid-template-columns:1fr 1fr}
+  .steps-grid{grid-template-columns:1fr;gap:24px}
+  .steps-grid::before{display:none}
+  .how-step{align-items:flex-start;text-align:left;flex-direction:row;gap:16px}
+  .how-step-num{flex-shrink:0}
+  .hero-title{font-size:36px}
+  .hero,.tools-section,.how-section,.impact-section,.footer{padding-left:24px;padding-right:24px}
+  .nav{padding:0 24px}
+  .hero-stats{gap:28px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand"><span>omd</span> AI</div>
+  <div class="nav-right">
+    <a class="nav-link" href="#tools">Tools</a>
+    <a class="nav-link" href="#impact">Impact</a>
+    <div class="nav-badge">OMD Amman</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-shapes">
+    <div class="hs hs1"></div><div class="hs hs2"></div>
+    <div class="hs hs3"></div><div class="hs hs4"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">OMD AI Workflow System</div>
+    <div class="hero-title">The tools your team<br>needs. <span>Built for OMD.</span></div>
+    <div class="hero-sub">Three AI-powered tools that automate the most time-consuming workflows in the agency — reports, budgets, and media plans. Built specifically for OMD Amman.</div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">55h</div>
+        <div class="hero-stat-label">saved per month<br>on reporting alone</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">3</div>
+        <div class="hero-stat-label">tools covering the<br>full campaign lifecycle</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">60s</div>
+        <div class="hero-stat-label">to generate a<br>complete media plan</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section class="tools-section" id="tools">
+  <div class="section-eyebrow">The Toolkit</div>
+  <div class="section-title">Three tools. <span>One system.</span></div>
+  <div class="section-sub">Each tool solves a specific pain point. Together they cover the full campaign workflow from plan to report.</div>
+
+  <div class="tools-grid">
+
+    <!-- Tool 1: Report Engine -->
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-num">Tool 01</div>
+        <div class="tool-icon">📊</div>
+        <div class="tool-name">Report Engine</div>
+        <div class="tool-desc">Upload a CSV export from any platform. Get a fully branded, client-ready end-of-campaign report with AI-written analysis in minutes.</div>
+        <div class="tool-saves">
+          <div class="tool-saves-num">4–6h</div>
+          <div class="tool-saves-label">saved per report<br>per client</div>
+        </div>
+        <div class="tool-features">
+          <div class="tool-feature">Multi-platform — Meta, Google, YouTube, DV360, ATD</div>
+          <div class="tool-feature">Goal vs achievement % as the headline metric</div>
+          <div class="tool-feature">Age & gender breakdown charts</div>
+          <div class="tool-feature">AI-written learnings & recommendations per platform</div>
+          <div class="tool-feature">OMD branded slides — print to PDF instantly</div>
+        </div>
+      </div>
+      <div class="tool-card-bottom">
+        <a class="tool-btn" href="https://zaidbarakatt.github.io/OMD-AI/OMD_Report_Engine_v2.html" target="_blank"><span>→</span> Open Report Engine</a>
+      </div>
+    </div>
+
+    <!-- Tool 2: Budget Calculator -->
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-num">Tool 02</div>
+        <div class="tool-icon">💰</div>
+        <div class="tool-name">Budget Calculator</div>
+        <div class="tool-desc">Enter platform budgets in USD. Get a fully formatted budget summary sheet with JOD conversion and all Jordanian taxes calculated automatically.</div>
+        <div class="tool-saves">
+          <div class="tool-saves-num">30min</div>
+          <div class="tool-saves-label">saved per budget<br>summary sheet</div>
+        </div>
+        <div class="tool-features">
+          <div class="tool-feature">JOD & USD dual currency — 1 USD = 0.71 JOD</div>
+          <div class="tool-feature">2% agency fee, 10% withholding, 16% sales tax</div>
+          <div class="tool-feature">Platform share bars per line item</div>
+          <div class="tool-feature">Groups by media type — Digital, Social, Programmatic</div>
+          <div class="tool-feature">Print-ready OMD branded sheet</div>
+        </div>
+      </div>
+      <div class="tool-card-bottom">
+        <a class="tool-btn" href="https://zaidbarakatt.github.io/OMD-AI/OMD_Budget_Calculator_v2.html" target="_blank"><span>→</span> Open Budget Calculator</a>
+      </div>
+    </div>
+
+    <!-- Tool 3: Media Plan Generator -->
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-num">Tool 03</div>
+        <div class="tool-icon">📋</div>
+        <div class="tool-name">Media Plan Generator</div>
+        <div class="tool-desc">Fill in a campaign brief. Get a complete full-funnel media plan with channel strategy, budget allocation, and KPI targets — in 60 seconds.</div>
+        <div class="tool-saves">
+          <div class="tool-saves-num">1 day</div>
+          <div class="tool-saves-label">of planning work<br>done in 60 seconds</div>
+        </div>
+        <div class="tool-features">
+          <div class="tool-feature">Full-funnel — Awareness, Consideration, Conversion</div>
+          <div class="tool-feature">Knows Jordanian market — Roya News, Arab Trade Desk</div>
+          <div class="tool-feature">Budget split with JOD/USD and all taxes</div>
+          <div class="tool-feature">KPI benchmarks per platform</div>
+          <div class="tool-feature">OMD branded plan — print to PDF instantly</div>
+        </div>
+      </div>
+      <div class="tool-card-bottom">
+        <a class="tool-btn" href="https://zaidbarakatt.github.io/OMD-AI/OMD_Media_Plan_Generator.html" target="_blank"><span>→</span> Open Media Plan Generator</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section class="impact-section" id="impact">
+  <div class="impact-shapes"><div class="is is1"></div><div class="is is2"></div></div>
+  <div class="impact-inner">
+    <div class="impact-eyebrow">The Numbers</div>
+    <div class="impact-title">What this system <span>saves OMD</span> every month</div>
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-num green">55h</div>
+        <div class="impact-label">analyst hours saved on reporting per month across 15 clients</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num green">7.5h</div>
+        <div class="impact-label">saved on budget sheets — 30 min per campaign × 15 clients</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num green">15h</div>
+        <div class="impact-label">saved on media planning — 1 day per plan × multiple campaigns</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num green">77h+</div>
+        <div class="impact-label">total hours saved per month — that's 2 full working weeks</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="section-eyebrow">How It Works</div>
+  <div class="section-title">Simple by <span>design</span></div>
+  <div class="section-sub">Every tool follows the same pattern. No training required.</div>
+  <div class="steps-grid">
+    <div class="how-step">
+      <div class="how-step-num">1</div>
+      <div>
+        <div class="how-step-title">Fill in the brief</div>
+        <div class="how-step-desc">Client name, campaign details, budget, objective, audience. Takes under 2 minutes.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">2</div>
+      <div>
+        <div class="how-step-title">Hit generate</div>
+        <div class="how-step-desc">Claude reads the inputs and produces the full output — plan, report, or budget sheet — in under 60 seconds.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">3</div>
+      <div>
+        <div class="how-step-title">Print or share</div>
+        <div class="how-step-desc">Every output is OMD branded and print-ready. Export to PDF and send directly to the client.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand"><span>omd</span> AI Workflow System</div>
+  <div class="footer-copy">© 2026 OMD Worldwide · Built for OMD Amman</div>
+</footer>
+
+</body>
+</html>
